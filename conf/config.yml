@@ -1,0 +1,7 @@
+Addr: aaaaa.redis.rds.aliyuncs.com
+Port: 6379
+Password: pwdpwdpwdpwdpassword
+DB: 12
+PullKeysCount: 20000
+PipeQueryCount: 2000
+ConsumerNum: 3
