@@ -8,3 +8,7 @@
 /dataSources.local.xml
 .idea/
 .conf/
+conf/
+result/
+*.log
+bin/

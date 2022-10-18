@@ -13,7 +13,7 @@ import (
 var c Config
 
 func init() {
-	file := fmt.Sprintf("%s/conf/config.yml", GetExcPath())
+	file := fmt.Sprintf("%s/../conf/config.yml", GetExcPath())
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
 		log.Printf("Read Config File Error: #%v ", err)

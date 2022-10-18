@@ -18,8 +18,10 @@ func main() {
 		pkg.QueryNoTtlKey()
 	} else if action == "delnottl_md5" {
 		pkg.DelNoTTLPre()
+	} else if action == "bigkey" {
+		pkg.BigKeyTOP()
 	} else {
-		log.Println("exit....")
+		log.Println("Please Input parameter, exit....")
 	}
 
 }

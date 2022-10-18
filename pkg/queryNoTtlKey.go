@@ -23,30 +23,6 @@ var lck sync.Mutex
 // var pipeQueryCount int
 var noTtlKey int
 
-func getKeysToCh() {
-	var cursor uint64
-	var keys []string
-	var err error
-	wg.Add(1)
-	defer wg.Done()
-	for {
-		keys, cursor, err = rdb.Scan(ctx, cursor, "*", c.PullKeysCount).Result()
-		if err != nil {
-			panic(err)
-		}
-		for _, v := range keys {
-			lck.Lock()
-			keysCount += 1
-			lck.Unlock()
-			keysCh <- v
-		}
-		if cursor == 0 {
-			fmt.Println("Product: Get Keys End...keys count: ", keysCount)
-			return
-		}
-	}
-}
-
 func ttlIsPermanment(t int64) bool {
 	if t == -1 {
 		return true
@@ -71,7 +47,7 @@ func getKeysTtl(temp chan []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		f, err = openResultFile()
+		f, err = openResultFile("noTTL.txt")
 		write := bufio.NewWriter(f)
 		if err != nil {
 			panic(err)
@@ -88,44 +64,6 @@ func getKeysTtl(temp chan []string) {
 		}
 		write.Flush()
 		f.Close()
-	}
-}
-
-func openResultFile() (f *os.File, err error) {
-	workPath := GetExcPath()
-	filePathRoot := fmt.Sprintf("%s/result", workPath)
-	filePath := fmt.Sprintf("%s/noTTL.txt", filePathRoot)
-	err = os.MkdirAll(filePathRoot, 0644)
-	if err != nil {
-		return nil, err
-	}
-	f, err = os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return f, err
-	//	Warn: f.Close() outside
-}
-
-func keysGroupBy(keysch chan string, keysGB chan []string) {
-	log.Println("start chan group by")
-	wg.Add(1)
-	defer wg.Done()
-	var temp []string
-	for {
-		select {
-		case key := <-keysch:
-			temp = append(temp, key)
-			if len(temp) >= c.PipeQueryCount {
-				keysGB <- temp
-				temp = nil
-			}
-		case <-time.After(time.Second * 3):
-			keysGB <- temp
-			close(keysGB)
-			log.Printf("End...Close Goup By chin")
-			return
-		}
 	}
 }
 
@@ -147,7 +85,7 @@ func QueryNoTtlKey() {
 	for i := 0; i < c.ConsumerNum; i++ {
 		go getKeysTtl(keysGB)
 	}
-	getKeysToCh()
+	getKeysToCh(keysCh)
 	wg.Wait()
 	fmt.Printf("Result= Queue Remaining: %v, keys Total: %v, NoTTL keys Total: %v \n", len(keysCh), keysCount, noTtlKey)
 }
