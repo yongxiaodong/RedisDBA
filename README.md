@@ -18,7 +18,7 @@ redis key在线扫描。直接链接redis进行在线扫描（默认配置下，
 
 
 ## 配置文件
-
+```
 Addr: redis链接地址  
 Port: redis端口  
 Password: redis密码  
@@ -26,3 +26,4 @@ DB: redis的DB，redis DB默认为0
 PullKeysCount: 20000    一次拉取多少个key（根据redis配置自定义）  
 PipeQueryCount: 2000    一次查询多少个key（根据redis配置自定义）  
 ConsumerNum: 3  协程数量（根据redis配置自定义）  
+```
