@@ -71,20 +71,20 @@ func getKeysUseMem(temp chan []string) {
 		if len(top50L) > 49 {
 			top50L = top50L[:50]
 		}
+		var f *os.File
+		f, err = openResultFile("BigKey.txt")
+		if err != nil {
+			panic(err)
+		}
+		write := bufio.NewWriter(f)
+		for _, v := range top50L {
+			s := fmt.Sprintf("%s %d", v.Name, v.Mem)
+			write.WriteString(s + "\n")
+		}
+		write.Flush()
+		defer f.Close()
 	}
-	var f *os.File
-	var err error
-	f, err = openResultFile("BigKey.txt")
-	if err != nil {
-		panic(err)
-	}
-	write := bufio.NewWriter(f)
-	for _, v := range top50L {
-		s := fmt.Sprintf("%s %d", v.Name, v.Mem)
-		write.WriteString(s + "\n")
-	}
-	write.Flush()
-	defer f.Close()
+	log.Printf("scan completed. result: %s/result/", GetExcPath())
 
 }
 

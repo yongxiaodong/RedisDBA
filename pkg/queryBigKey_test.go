@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"RedisDBA/cmd"
 	"context"
 	"fmt"
 	"sync"
@@ -10,7 +11,8 @@ import (
 
 func TestQueryNoTtlKey(t *testing.T) {
 	wg := sync.WaitGroup{}
-	err := InitClient()
+	cmd.InitConfig()
+	err := InitClient(c)
 	if err != nil {
 		panic(err)
 	}

@@ -35,8 +35,8 @@ func openResultFile(filename string) (f *os.File, err error) {
 	workPath := GetExcPath()
 	filePathRoot := fmt.Sprintf("%s/result", workPath)
 	//ClearDir(filePathRoot)
-	ClearFile(filePathRoot)
 	filePath := fmt.Sprintf("%s/%s", filePathRoot, filename)
+	ClearFile(filePath)
 	err = os.MkdirAll(filePathRoot, 0644)
 	if err != nil {
 		return nil, err

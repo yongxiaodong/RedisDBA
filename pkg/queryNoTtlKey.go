@@ -65,6 +65,7 @@ func getKeysTtl(temp chan []string) {
 		write.Flush()
 		f.Close()
 	}
+	log.Printf("scan completed. result: %s/result/", GetExcPath())
 }
 
 func processStdout() {

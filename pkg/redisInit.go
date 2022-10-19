@@ -4,27 +4,27 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"gopkg.in/yaml.v2"
 	"log"
-	"os"
 	"time"
 )
 
+//var c Config
+
+//	func init() {
+//		file := fmt.Sprintf("%s/conf/config.yml", GetExcPath())
+//		yamlFile, err := os.ReadFile(file)
+//		if err != nil {
+//			log.Printf("Read Config File Error: #%v ", err)
+//		}
+//		err = yaml.Unmarshal(yamlFile, &c)
+//		if err != nil {
+//			log.Fatalf("Unmarshal: %v", err)
+//		}
+//	}
 var c Config
 
-func init() {
-	file := fmt.Sprintf("%s/conf/config.yml", GetExcPath())
-	yamlFile, err := os.ReadFile(file)
-	if err != nil {
-		log.Printf("Read Config File Error: #%v ", err)
-	}
-	err = yaml.Unmarshal(yamlFile, &c)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
-}
-
-func InitClient() (err error) {
+func InitClient(config Config) (err error) {
+	c = config
 	rdb = redis.NewClient(&redis.Options{
 		Addr:     c.GetConnectAddr(),
 		Password: c.Password,

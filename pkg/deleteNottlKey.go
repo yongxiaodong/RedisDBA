@@ -7,14 +7,13 @@ import (
 	"io"
 	"log"
 	"os"
-	"regexp"
 	"time"
 )
 
-func checkMd5(s string) (matchRes bool) {
-	res, _ := regexp.MatchString("([a-f\\d]{32}|[A-F\\d]{32})", s)
-	return res
-}
+//func checkMd5(s string) (matchRes bool) {
+//	res, _ := regexp.MatchString("([a-f\\d]{32}|[A-F\\d]{32})", s)
+//	return res
+//}
 
 func DelNoTTL(ch chan []string) {
 	wg.Add(1)
@@ -22,7 +21,8 @@ func DelNoTTL(ch chan []string) {
 	pipe := rdb.Pipeline()
 	for n := range ch {
 		for _, v := range n {
-			if v != "" && checkMd5(v) == true {
+			//if v != "" && checkMd5(v) == true {
+			if v != "" {
 				pipe.Del(ctx, v)
 			}
 		}
@@ -41,6 +41,7 @@ func DelNoTTLPre() {
 	filePath := fmt.Sprintf("%s/result/noTTL.txt", GetExcPath())
 	f, err := os.Open(filePath)
 	if err != nil {
+		log.Printf("read nottl file error. Please execute ./redisDBA nottl first")
 		panic(err)
 	}
 	defer f.Close()
