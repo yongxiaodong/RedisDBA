@@ -1,14 +1,17 @@
 # RedisDBA  
 redis key在线扫描。直接链接redis进行在线扫描（默认配置下，qps大约4W，可根据redis性能自行调整配置）
 
+- 帮助  
+
+` ./bin/RedisDBA_linux_amd64 -h`
 
 - 未设置TTL的key扫描  
 
-` ./bin/RedisDBA_linux_amd64 -a nottl`
+` ./bin/RedisDBA_linux_amd64  nottl`
 
-- 大key前50名扫描
+- 大key前50名扫描并指定配置文件路径
 
-`./bin/RedisDBA_linux_amd64 -a bigkey`
+`./bin/RedisDBA_linux_amd64 bigkey -c /etc/config.yml`
 
 
 ## 输出目录
