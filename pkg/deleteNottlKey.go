@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var delCountProcess int64
+
 //func checkMd5(s string) (matchRes bool) {
 //	res, _ := regexp.MatchString("([a-f\\d]{32}|[A-F\\d]{32})", s)
 //	return res
@@ -30,9 +32,17 @@ func DelNoTTL(ch chan []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		for _, v := range res {
-			fmt.Println(v)
+		for _ = range res {
+			lck.Lock()
+			delCountProcess += 1
+			lck.Unlock()
 		}
+	}
+}
+func processStdoutDel() {
+	for {
+		time.Sleep(time.Second * 3)
+		fmt.Printf("Deleted: %v + \n", delCountProcess)
 	}
 }
 
@@ -51,6 +61,7 @@ func DelNoTTLPre() {
 	fileGBch := make(chan []string, 2000)
 
 	go keysGroupBy(filech, fileGBch)
+	go processStdoutDel()
 	for i := 0; i <= c.ConsumerNum; i++ {
 		go DelNoTTL(fileGBch)
 	}
@@ -64,5 +75,5 @@ func DelNoTTLPre() {
 		}
 	}()
 	wg.Wait()
-	time.Sleep(time.Second * 5)
+	fmt.Printf("Deleted: %v +\n", delCountProcess)
 }

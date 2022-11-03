@@ -36,6 +36,11 @@ func getKeysTtl(temp chan []string) {
 	defer wg.Done()
 	var f *os.File
 	pipe := rdb.Pipeline()
+	f, err := openResultFile("noTTL.txt")
+	defer f.Close()
+	if err != nil {
+		panic(err)
+	}
 	for v := range temp {
 		for _, keys := range v {
 			lck.Lock()
@@ -47,11 +52,7 @@ func getKeysTtl(temp chan []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		f, err = openResultFile("noTTL.txt")
 		write := bufio.NewWriter(f)
-		if err != nil {
-			panic(err)
-		}
 		for _, v := range res {
 			t := v.(*redis.DurationCmd).Val().Nanoseconds()
 			if IsPermanment := ttlIsPermanment(t); IsPermanment == true {
@@ -63,7 +64,6 @@ func getKeysTtl(temp chan []string) {
 			}
 		}
 		write.Flush()
-		f.Close()
 	}
 	log.Printf("scan completed. result: %s/result/", GetExcPath())
 }
