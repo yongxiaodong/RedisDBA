@@ -31,16 +31,12 @@ func ttlIsPermanment(t int64) bool {
 }
 
 // use pipe get TTL
-func getKeysTtl(temp chan []string) {
-	wg.Add(1)
+func getKeysTtl(temp chan []string, f *os.File) {
+	//wg.Add(1)
 	defer wg.Done()
-	var f *os.File
 	pipe := rdb.Pipeline()
-	f, err := openResultFile("noTTL.txt")
-	defer f.Close()
-	if err != nil {
-		panic(err)
-	}
+	write := bufio.NewWriter(f)
+	defer write.Flush()
 	for v := range temp {
 		for _, keys := range v {
 			lck.Lock()
@@ -52,20 +48,18 @@ func getKeysTtl(temp chan []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		write := bufio.NewWriter(f)
+		lck.Lock()
 		for _, v := range res {
 			t := v.(*redis.DurationCmd).Val().Nanoseconds()
 			if IsPermanment := ttlIsPermanment(t); IsPermanment == true {
-				lck.Lock()
 				noTtlKey = noTtlKey + 1
-				lck.Unlock()
 				c := fmt.Sprintf("%v", v.Args()[1])
 				write.WriteString(c + "\n")
 			}
 		}
+		lck.Unlock()
 		write.Flush()
 	}
-	log.Printf("scan completed. result: %s/result/", GetExcPath())
 }
 
 func processStdout() {
@@ -83,10 +77,19 @@ func QueryNoTtlKey() {
 	go processStdout() // print info
 	keysGB := make(chan []string, 20000)
 	go keysGroupBy(keysCh, keysGB) // wg.Done
+
+	var f *os.File
+	f, err := openResultFile("noTTL.txt")
+	if err != nil {
+		panic(err)
+	}
 	for i := 0; i < c.ConsumerNum; i++ {
-		go getKeysTtl(keysGB)
+		wg.Add(1)
+		go getKeysTtl(keysGB, f)
 	}
 	getKeysToCh(keysCh)
 	wg.Wait()
+	f.Close()
 	fmt.Printf("Result= Queue Remaining: %v, keys Total: %v, NoTTL keys Total: %v \n", len(keysCh), keysCount, noTtlKey)
+	log.Printf("scan completed. result: %s/result/", GetExcPath())
 }

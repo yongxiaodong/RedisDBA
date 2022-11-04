@@ -18,7 +18,8 @@ var delCountProcess int64
 //}
 
 func DelNoTTL(ch chan []string) {
-	wg.Add(1)
+	fmt.Println("start delete...")
+	//wg.Add(1)
 	defer wg.Done()
 	pipe := rdb.Pipeline()
 	for n := range ch {
@@ -38,6 +39,7 @@ func DelNoTTL(ch chan []string) {
 			lck.Unlock()
 		}
 	}
+	fmt.Println("end delete...")
 }
 func processStdoutDel() {
 	for {
@@ -63,6 +65,7 @@ func DelNoTTLPre() {
 	go keysGroupBy(filech, fileGBch)
 	go processStdoutDel()
 	for i := 0; i <= c.ConsumerNum; i++ {
+		wg.Add(1)
 		go DelNoTTL(fileGBch)
 	}
 	func() {
@@ -75,5 +78,5 @@ func DelNoTTLPre() {
 		}
 	}()
 	wg.Wait()
-	fmt.Printf("Deleted: %v +\n", delCountProcess)
+	fmt.Printf("Finished, Deleted: %v +\n", delCountProcess)
 }
